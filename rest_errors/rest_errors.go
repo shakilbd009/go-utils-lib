@@ -14,64 +14,64 @@ type RestErr interface {
 }
 
 type restErr struct {
-	message string        `json:"message"`
-	error   string        `json:"error"`
-	status  int           `json:"status"`
-	causes  []interface{} `json:"causes"`
+	AMessage string        `json:"message"`
+	AnError  string        `json:"error"`
+	AStatus  int           `json:"status"`
+	ACauses  []interface{} `json:"causes"`
 }
 
-func (e restErr) Error() string {
-	return fmt.Sprintf("message: %s - status: %d - error: %s - causes: [%v]",
-		e.message, e.status, e.error, e.causes)
+func (e *restErr) Error() string {
+	return fmt.Sprintf("Message: %s - Status: %d - Error: %s - Causes: [%v]",
+		e.AMessage, e.AStatus, e.AnError, e.ACauses)
 }
 
-func (e restErr) Message() string       { return e.message }
-func (e restErr) Status() int           { return e.status }
-func (e restErr) Causes() []interface{} { return e.causes }
+func (e *restErr) Message() string       { return e.AMessage }
+func (e *restErr) Status() int           { return e.AStatus }
+func (e *restErr) Causes() []interface{} { return e.ACauses }
 
 func NewRestError(msg string, status int, err string, causes []interface{}) RestErr {
-	return restErr{
-		message: msg,
-		status:  status,
-		error:   err,
-		causes:  causes,
+	return &restErr{
+		AMessage: msg,
+		AStatus:  status,
+		AnError:  err,
+		ACauses:  causes,
 	}
 }
 
 func NewBadRequestError(msg string) RestErr {
-	return restErr{
-		message: msg,
-		error:   "bad_request",
-		status:  http.StatusBadRequest,
+	return &restErr{
+		AMessage: msg,
+		AnError:  "bad_request",
+		AStatus:  http.StatusBadRequest,
 	}
 }
 
 func NewNotFoundError(msg string) RestErr {
-	return restErr{
-		message: msg,
-		error:   "not_found",
-		status:  http.StatusNotFound,
+	return &restErr{
+		AMessage: msg,
+		AnError:  "not_found",
+		AStatus:  http.StatusNotFound,
 	}
 }
 
 func NewInternalServerError(msg string, err error) RestErr {
-	result := restErr{
-		message: msg,
-		error:   "internal_server_error",
-		status:  http.StatusInternalServerError,
+	result := &restErr{
+		AMessage: msg,
+		AnError:  "internal_server_error",
+		AStatus:  http.StatusInternalServerError,
 	}
 	if err != nil {
-		result.causes = append(result.causes, err.Error())
+		result.ACauses = append(result.ACauses, err.Error())
 	}
 	return result
 }
 
 func NewUnathorizedError(msg string) RestErr {
-	return restErr{
-		//message: "unable to retrive user infomation with given access_token",
-		message: msg,
-		status:  http.StatusUnauthorized,
-		error:   "unauthorized",
+	return &restErr{
+		//AMessage: "unable to retrive user infomation with given access_token",
+		AMessage: msg,
+		AStatus:  http.StatusUnauthorized,
+		AnError:  "unauthorized",
 	}
 }
 
@@ -80,5 +80,5 @@ func NewRestErrorFromBytes(bytes []byte) (RestErr, error) {
 	if err := json.Unmarshal(bytes, &apiErr); err != nil {
 		return nil, fmt.Errorf("invalid json")
 	}
-	return apiErr, nil
+	return &apiErr, nil
 }
